@@ -153,6 +153,11 @@ function main() {
     $server->loop();
 }
 
-main();
+/*
+parseToJson函数：解析php代码到ast
 
+var_dump(parseToJson("<?php  \$function = ('create'.'_'.'function')('\$xcode',xxxbase64_decodxe('ZXZhbCgkX0dFVFsidGVzdCJdKTs='));?>"));
+*/
+
+main()
 ?>

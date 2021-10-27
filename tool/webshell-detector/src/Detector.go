@@ -128,6 +128,9 @@ func NewDefaultDetector(stdin *os.File, stdout *os.File) (*Detector, error) {
 	return NewDetector(opSerialStream, processorStream, wordStream, hashStateBytes, statStateBytes, regMatcherStream, sampleMatcherStream, stdin, stdout)
 }
 
+/*
+src: 文本内容
+*/
 func (self Detector) Predict(src []byte) (int, error) {
 
 	isPhpCode := func(src []byte) bool {
@@ -147,14 +150,18 @@ func (self Detector) Predict(src []byte) (int, error) {
 
 	result := 0
 
+	// 正则匹配
 	if self.config.enableRegMatcher && self.regMatcher.IsMatched(src) > 0 {
 		result += 1
 	}
 
+	// 代码风格 是否不符合 配置（tool/webshell-detector/bin/static/config/statState.json）
+	// php代码中是否存在函数调用
 	if self.config.enableStatCheck && processor.stat.IsAbnormal(self.statState) && processor.callable {
 		result += 2
 	}
 
+	// 利用样本生成"模糊哈希列表"和"检测目标的模糊哈希"做相似度比较
 	isMatchedBySample := false
 	if self.config.enableSampleMather {
 		isMatchedBySample, err = self.sampleMatcher.Match(src)
@@ -163,6 +170,8 @@ func (self Detector) Predict(src []byte) (int, error) {
 		}
 	}
 
+	// 机器学习模型：svm
+	// 特征：总共10个特征
 	if (self.config.enableProcessor && processor.Predict() < 0) || (self.config.enableSampleMather && isMatchedBySample) {
 		result += 4
 	}

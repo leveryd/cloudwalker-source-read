@@ -12,28 +12,33 @@ int execute(void);
 import "C"
 
 import (
-    "errors"
-    "os"
+	"errors"
+	"os"
 )
 
 var Stdin, Stdout *os.File
 
+// 包的init函数会自动被执行
 func init() {
-    var err error
-    var stdin, stdout *os.File
-    stdin, Stdin, err = os.Pipe()
-    if err != nil { panic(err) }
-    Stdout, stdout, err = os.Pipe()
-    if err != nil { panic(err) }
+	var err error
+	var stdin, stdout *os.File
+	stdin, Stdin, err = os.Pipe()
+	if err != nil {
+		panic(err)
+	}
+	Stdout, stdout, err = os.Pipe()
+	if err != nil {
+		panic(err)
+	}
 
-    if ret := C.init(C.intptr_t(stdin.Fd()), C.intptr_t(stdout.Fd())); ret != 0 {
-        panic("cannot initialize PHP runtime")
-    }
+	if ret := C.init(C.intptr_t(stdin.Fd()), C.intptr_t(stdout.Fd())); ret != 0 {
+		panic("cannot initialize PHP runtime")
+	}
 }
 
 func Start() error {
-    if (C.execute() != 0) {
-        return errors.New("cannot start PHP runtime")
-    }
-    return nil
+	if C.execute() != 0 {
+		return errors.New("cannot start PHP runtime")
+	}
+	return nil
 }

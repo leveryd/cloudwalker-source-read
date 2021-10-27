@@ -23,6 +23,6 @@ func (self opSerial) Predict(model *libSvm.Model) float64 {
 			inputData[k+1] = v // model start at 1
 		}
 	}
-	_, result := model.PredictValues(inputData)
+	_, result := model.PredictValues(inputData) // svm算法
 	return result[0]
 }

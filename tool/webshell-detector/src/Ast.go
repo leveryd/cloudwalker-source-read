@@ -93,7 +93,7 @@ func getOpSerial(ast interface{}) (result [][]int) {
 
 	nowSerial := make([]int, 0)
 
-	queue = append(queue, opQueueNode{"root", ast, 0, nil})
+	queue = append(queue, opQueueNode{"root", ast, 0, nil}) // key=root
 
 	for len(queue) != 0 {
 		node := queue[0]
@@ -101,7 +101,7 @@ func getOpSerial(ast interface{}) (result [][]int) {
 		case astNode:
 			nowSerial = append(nowSerial, value.Kind)
 			//fmt.Printf("kind:%4v(%4v)\t", value.Kind, node.Layer)
-			queue = append(queue, opQueueNode{"children", value.Children, node.Layer, &value})
+			queue = append(queue, opQueueNode{"children", value.Children, node.Layer, &value}) // key=children
 		case string:
 		case float64:
 		case nil:
@@ -121,7 +121,7 @@ func getOpSerial(ast interface{}) (result [][]int) {
 				queue = append(queue, opQueueNode{string(i), v, node.Layer + 1, node.Father})
 			}
 			if node.Key == "children" {
-				queue = append(queue, opQueueNode{"separator", nil, node.Layer + 1, node.Father})
+				queue = append(queue, opQueueNode{"separator", nil, node.Layer + 1, node.Father}) // key=separator
 			}
 		case map[string]interface{}:
 			keys := make([]string, 0)
@@ -225,6 +225,10 @@ func (state *arrayHashState) Load(bytes []byte) error {
 	return json.Unmarshal(bytes, state)
 }
 
+/*
+创建opSerial对象
+
+*/
 func (ast ast) GetOpSerial(state *arrayHashState) opSerial {
 	serials := getOpSerial(ast.root)
 	cleanOpSerialRepeatedly(&serials, 10, 5)

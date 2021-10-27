@@ -30,13 +30,13 @@ func newSampleMatcher(sampleHashFile io.Reader) (*sampleMatcher, error) {
 }
 
 func (matcher *sampleMatcher) Match(src []byte) (bool, error) {
-	hash, err := ssdeep.FuzzyBytes(src)
+	hash, err := ssdeep.FuzzyBytes(src) // 计算"检测对象"的模糊哈希
 	if err != nil {
 		return false, err
 	}
 
 	for _, h := range matcher.hashes {
-		score, err := ssdeep.Distance(hash, h)
+		score, err := ssdeep.Distance(hash, h) // 和"webshell模糊哈希列表"做相似度比较
 		if err != nil {
 			return false, err
 		}

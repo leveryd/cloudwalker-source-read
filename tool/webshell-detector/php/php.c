@@ -115,6 +115,11 @@ static int init_php_stdio(int fd_in, int fd_out) {
     return 0;
 }
 
+/*
+从内存中加载php代码
+
+内存中的代码也就是payload_phar，从payload-phar.c可以看出来，代码是pyaload.phar文件的十六进制。（有shellcode那味儿）
+*/
 static int load_phar(void) {
     php_stream *fp = php_stream_memory_open(TEMP_STREAM_READONLY, (char *)payload_phar, payload_phar_len);
 
@@ -129,6 +134,7 @@ static int load_phar(void) {
     return 0;
 }
 
+// golang php包初始化时，会调用init函数
 int init(intptr_t fd_in, intptr_t fd_out) {
     php_embed_module.php_ini_ignore = 1;
     if (php_embed_init(0, NULL) != SUCCESS) { return 1; }
@@ -187,18 +193,28 @@ int init(intptr_t fd_in, intptr_t fd_out) {
 
 static void* _execute(void* arg) {
     static const char entry_php[] = "require 'phar://payload/';";
+    fputs("hi1", stderr);
     if (eval(entry_php, sizeof entry_php - 1, NULL)) {
+        fputs("hi2", stderr);
         fputs(get_error_message(), stderr);
     }
+    fputs("hi3", stderr);
     return NULL;
 }
 
+/*
+函数功能：解析管道输入的php代码，输出ast
+
+非windows平台下，创建新线程
+*/
 int execute(void) {
 #ifdef WIN32
     _execute();
 #else
     pthread_t thread;
     pthread_attr_t attr;
+
+    fputs("hi4", stderr);
 
     if (pthread_attr_init(&attr) ||
         pthread_attr_setstacksize(&attr, stack_limit) ||

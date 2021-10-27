@@ -40,13 +40,22 @@ func newProcessorFromSrc(detector *Detector, src []byte, stdin *os.File, stdout 
 	return newProcessor(detector, ast, &stat), nil
 }
 
+/*
+预测函数
+
+算法模型：svm
+特征：10个特征
+	1-8：代码风格，八个特征
+	9："操作序列模型"的预测结果
+	10："操作名称模型"的预测结果
+*/
 func (self processor) Predict() float64 {
 	var inputData = make(map[int]float64, 11)
-	for k, v := range self.stat.GetVector() {
+	for k, v := range self.stat.GetVector() { // 代码风格，八个特征
 		inputData[k+1] = v // model start at 1
 	}
-	inputData[9] = self.opSerial.Predict(self.detector.opSerialModel)
-	inputData[10] = self.words.Predict(self.detector.wordsModel)
+	inputData[9] = self.opSerial.Predict(self.detector.opSerialModel) // 第九个特征："操作序列模型"的预测结果，模型使用svm算法
+	inputData[10] = self.words.Predict(self.detector.wordsModel)      // 第十个特征："操作名称模型"的预测结果，模型使用nb算法
 	_, result := self.detector.processModel.PredictValues(inputData)
 	return result[0]
 }

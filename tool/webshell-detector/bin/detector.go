@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	WebshellDetector "webshell-detector/src"
 
-	"../php"
-	"../src"
+	"webshell-detector/php"
 )
 
 var outputPtr *string
@@ -52,7 +52,7 @@ func walk(path string, info os.FileInfo, _ error) error {
 		fmt.Printf("\b")
 	}
 	fmt.Printf("\rTesting %-50s / %d risks / Runtime %v", info.Name(), countRisk, time.Since(t0))
-	if score > 0 {
+	if score >= 0 {
 		countRisk++
 		var risk int
 		switch score {
@@ -89,7 +89,7 @@ func multiTest(detectPath string) {
 func singleTest(path string) {
 
 	countFile++
-	
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -101,7 +101,7 @@ func singleTest(path string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if score > 0 {
+	if score >= 0 {
 		var risk int
 		switch score {
 		case 1, 2:
@@ -128,9 +128,9 @@ func singleTest(path string) {
 
 func printResult(fileIndex int, filePath string, fileRisk int) {
 	var res string
-	if len(filePath) > 80 && !*htmlPtr {
-		filePath = "..." + filePath[len(filePath)-77:len(filePath)]
-	}
+	//if len(filePath) > 80 && !*htmlPtr {
+	//	filePath = "..." + filePath[len(filePath)-77:len(filePath)]
+	//}
 	if *htmlPtr {
 		res = fmt.Sprintf("<tr><td>%08d<td>%s<td>%d\n", fileIndex, filePath, fileRisk)
 	} else {
